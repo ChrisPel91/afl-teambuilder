@@ -14,16 +14,16 @@ const PLAYERS_BY_TEAM = PLAYERS.reduce((acc, p) => {
   return acc;
 }, {});
 
+// Allowed AFL + VFL team names
 const VALID_TEAMS = [
   "Adelaide Crows", "Brisbane Lions", "Carlton", "Collingwood", "Essendon",
   "Fremantle", "Geelong Cats", "Gold Coast Suns", "GWS Giants", "Hawthorn",
   "Melbourne", "North Melbourne", "Port Adelaide", "Richmond",
   "St Kilda", "Sydney Swans", "West Coast Eagles", "Western Bulldogs",
-  "Sandringham Zebras"
+  "Sandringham Zebras" // example VFL team
 ];
 
 const TEAM_OPTIONS = Object.keys(PLAYERS_BY_TEAM)
-  .filter((team) => VALID_TEAMS.includes(team))
   .sort()
   .map((team) => ({
     value: team,
@@ -63,7 +63,7 @@ const selectStyles = {
   }),
 };
 
-function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, isVice, captainTaken, viceTaken }) {
+function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, isVice, captainTaken, viceTaken, showCaptainButtons = true }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   useEffect(() => {
@@ -71,12 +71,14 @@ function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, i
   }, [value]);
 
   if (value) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <span className="chosen-name">{value}</span>
-          <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
-        </div>
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <span className="chosen-name">{value}</span>
+        <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
+      </div>
+
+      {showCaptainButtons && (   // 👈 wrap C/VC buttons in this conditional
         <div className="cv-buttons">
           {!isCaptain && !captainTaken && (
             <button className="c-btn" onClick={() => onSetCaptain(value)}>C</button>
@@ -88,9 +90,10 @@ function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, i
           )}
           {isVice && <span className="vc-tag">VC</span>}
         </div>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
+}
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -229,31 +232,28 @@ export default function App() {
   const [captain, setCaptain] = useState(null);
   const [vice, setVice] = useState(null);
 
+  // Reset buttons
   const resetAFL = () => setAflTeam({});
   const resetVFL = () => setVflTeam({});
-  const resetAll = () => {
-    setAflTeam({});
-    setVflTeam({});
-    setCusp([]);
-    setTrade([]);
-    setDelist([]);
+  const resetAll = () => { 
+    setAflTeam({}); 
+    setVflTeam({}); 
+    setCusp([]); 
+    setTrade([]); 
+    setDelist([]); 
     setCaptain(null);
     setVice(null);
   };
 
   // ===== Share link system =====
   const handleShare = () => {
-    const encode = (team) => Object.entries(team)
-      .map(([k, v]) => `${k}:${v}`)
-      .join(";");
-
+    const encode = (team) => Object.entries(team).map(([k,v]) => `${k}:${v}`).join(";");
     const params = new URLSearchParams({
       afl: encode(aflTeam),
       vfl: encode(vflTeam),
       c: captain || "",
       vc: vice || "",
     });
-
     const url = `${window.location.origin}?${params.toString()}`;
     navigator.clipboard.writeText(url);
     alert("Team link copied! Share it anywhere:\n" + url);
@@ -308,30 +308,34 @@ export default function App() {
         />
 
         <div className="cusp">
-          <h3>On the Cusp of AFL Selection</h3>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={`cusp-${i}`} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-              <TwoStageSelect
-                value={cusp[i] || ""}
-                onChange={(val) => {
-                  const newList = [...cusp];
-                  newList[i] = val;
-                  setCusp(newList);
-                }}
-              />
-              <button
-                className="reset-btn"
-                onClick={() => {
-                  const newList = [...cusp];
-                  newList[i] = "";
-                  setCusp(newList);
-                }}
-              >
-                ⟳
-              </button>
-            </div>
-          ))}
-        </div>
+  <h3>On the Cusp of AFL Selection</h3>
+  {Array.from({ length: 5 }).map((_, i) => (
+    <div
+      key={`cusp-${i}`}
+      style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}
+    >
+      <TwoStageSelect
+        value={cusp[i] || ""}
+        onChange={(val) => {
+          const newList = [...cusp];
+          newList[i] = val;
+          setCusp(newList);
+        }}
+        showCaptainButtons={false}   // 👈 disables C/VC in cusp
+      />
+      <button
+        className="reset-btn"
+        onClick={() => {
+          const newList = [...cusp];
+          newList[i] = "";
+          setCusp(newList);
+        }}
+      >
+        ⟳
+      </button>
+    </div>
+  ))}
+</div>
 
         <Team
           title="VFL Team"
