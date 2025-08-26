@@ -91,18 +91,18 @@ function TwoStageSelect({
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <span className="chosen-name">{value}</span>
-          <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
+          <button type="button" className="reset-btn" onClick={() => onChange("")}>⟳</button>
         </div>
 
         {showCaptainButtons && (
           <div className="cv-buttons">
             {!isCaptain && !captainTaken && (
-              <button className="c-btn" onClick={() => onSetCaptain?.(value)}>C</button>
+              <button type="button" className="c-btn" onClick={() => onSetCaptain?.(value)}>C</button>
             )}
             {isCaptain && <span className="c-tag">C</span>}
 
             {!isVice && !viceTaken && (
-              <button className="vc-btn" onClick={() => onSetVice?.(value)}>VC</button>
+              <button type="button" className="vc-btn" onClick={() => onSetVice?.(value)}>VC</button>
             )}
             {isVice && <span className="vc-tag">VC</span>}
           </div>
@@ -172,7 +172,7 @@ function MasterFilterRow({ label, enabled, setEnabled, team, setTeam }) {
         menuPortalTarget={document.body}
       />
       {enabled && team && (
-        <button className="reset-btn" onClick={() => setTeam(null)}>Clear</button>
+        <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
       )}
     </div>
   );
@@ -194,11 +194,21 @@ function Team({
   const effFilter = sectionFilterEnabled ? sectionTeamFilter : null;
 
   const setPos = (id, val) => {
-    setTeam((t) => ({ ...t, [id]: val }));
-    // if clearing or replacing a player who is C/VC, clear those flags
-    if (!val || (captain && t[id] === captain)) setCaptain((c) => (t[id] === c ? null : c));
-    if (!val || (vice && t[id] === vice)) setVice((v) => (t[id] === v ? null : v));
-  };
+  setTeam((prev) => {
+    const next = { ...prev, [id]: val };
+
+    // Captain/Vice cleanup against the *previous* state
+    if (!val || (captain && prev[id] === captain)) {
+      setCaptain((c) => (prev[id] === c ? null : c));
+    }
+    if (!val || (vice && prev[id] === vice)) {
+      setVice((v) => (prev[id] === v ? null : v));
+    }
+
+    return next;
+  });
+};
+
 
   return (
     <div style={{ display: "flex", gap: "12px" }}>
@@ -426,10 +436,10 @@ export default function App() {
 
       <div className="header">
         <div className="top-buttons">
-          <button onClick={resetAFL}>Reset AFL</button>
-          <button onClick={resetVFL}>Reset VFL</button>
-          <button onClick={resetAll}>Reset All</button>
-          <button onClick={handleShare}>Share</button>
+          <button type="button" onClick={resetAFL}>Reset AFL</button>
+          <button type="button" onClick={resetVFL}>Reset VFL</button>
+          <button type="button" onClick={resetAll}>Reset All</button>
+          <button type="button" onClick={handleShare}>Share</button>
         </div>
       </div>
 
@@ -458,7 +468,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {aflFilterEnabled && aflFilterTeam && (
-                <button className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
@@ -488,7 +498,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {vflFilterEnabled && vflFilterTeam && (
-                <button className="reset-btn" onClick={() => setVflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
@@ -536,7 +546,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {cuspFilterEnabled && cuspFilterTeam && (
-                <button className="reset-btn" onClick={() => setCuspFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
@@ -553,16 +563,14 @@ export default function App() {
                 sectionTeamFilter={cuspFilterEnabled ? cuspFilterTeam : null}
                 showCaptainButtons={false} // no C/VC in cusp
               />
-              <button
-                className="reset-btn"
-                onClick={() => {
-                  const next = [...cusp];
-                  next[i] = "";
-                  setCusp(next);
-                }}
-              >
-                ⟳
-              </button>
+              <button type="button" className="reset-btn" onClick={() => {
+    const next = [...cusp];
+    next[i] = "";
+    setCusp(next);
+  }}
+>
+  ⟳
+</button>
             </div>
           ))}
         </div>
@@ -609,7 +617,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {tradeFilterEnabled && tradeFilterTeam && (
-                <button className="reset-btn" onClick={() => setTradeFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
@@ -657,7 +665,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {delistFilterEnabled && delistFilterTeam && (
-                <button className="reset-btn" onClick={() => setDelistFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
