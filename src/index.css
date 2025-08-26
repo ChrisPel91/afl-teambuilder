@@ -1,0 +1,288 @@
+/* AFL & VFL Team Builder — Dark Mode, Locked Layout, Adjusted Positioning */
+
+:root {
+  --bg:#0f1012;
+  --panel:#1b1d22;
+  --accent:#3aa267;
+  --accent2:#2f7a4f;
+  --text:#f4f6f8;
+  --line:#ffffffd9;
+}
+
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui, Arial, sans-serif;
+}
+
+/* ===== HEADERS (Title + Buttons) ===== */
+h1 { 
+  margin:18px 0 6px; 
+  text-align:center;     /* stays centered */
+}
+h2, h3 {
+  text-align:center;
+  margin:0 0 6px;
+}
+
+.header {
+  display:flex;
+  flex-direction:column;
+  align-items:center;    /* stays centered */
+  margin-bottom:8px;
+}
+.top-buttons {
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin-top:6px;
+}
+button {
+  background:#2d6cdf;
+  color:white;
+  border:0;
+  border-radius:6px;
+  padding:6px 10px;
+  cursor:pointer;
+}
+button:hover { opacity:.9 }
+
+/* ===== MAIN LAYOUT ===== */
+.field-row {
+  display:grid;
+  grid-template-columns: 1fr 420px 1fr;
+  gap:40px;
+  align-items:start;
+  width:min(1400px,96vw);
+  margin:0 auto;
+  margin-left:290px;   /* 👈 moves ALL field content left */
+}
+.field {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  position:relative;
+}
+
+/* Oval */
+.oval {
+  position:relative;
+  width:520px;
+  height:780px;
+  border-radius:50% / 60%;
+  background: radial-gradient(ellipse at center, var(--accent) 0%, var(--accent2) 100%);
+  border:3px solid var(--line);
+  overflow:hidden;
+}
+
+/* Centre square & circles */
+.center-square {
+  position:absolute;
+  top:31%; left:25%; right:25%; bottom:35%;
+  border:2px solid var(--line);
+  border-radius:8px;
+}
+.center-circle {
+  position:absolute;
+  top:46%; left:50%;
+  transform:translate(-50%,-50%);
+  width:92px; height:92px;
+  border:2px solid var(--line);
+  border-radius:50%;
+}
+.mini-circle {
+  position:absolute;
+  top:46%; left:50%;
+  transform:translate(-50%,-50%);
+  width:26px; height:26px;
+  border:2px solid var(--line);
+  border-radius:50%;
+}
+
+/* Curved lines (arches) */
+.curve-line {
+  position:absolute;
+  left:-2px;
+  width:calc(100% + 4px);
+  height:180px;
+  border:2px solid var(--line);
+  border-radius:50% / 100%;
+  pointer-events:none;
+  z-index:0;
+}
+.curve-top {
+  top:6%;  /* 👈 raise/lower top arch here */
+  border-top:none;
+}
+.curve-bottom {
+  top:65%;
+  border-bottom:none;
+}
+
+/* Position slots inside oval */
+.pos-slot {
+  position:absolute;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  width:60px;
+  z-index:5;
+}
+.pos-slot .Select__control {
+  min-width: 120px !important;
+  max-width: 140px !important;
+  font-size: 12px;
+}
+.pos-label {
+  display:block;
+  font-size:10px;
+  margin-bottom:2px;
+  opacity:0.9;
+  color:var(--text);
+}
+
+/* Followers & interchange */
+.followers-panel .Select__control,
+.interchange-panel .Select__control {
+  min-width: 140px !important;
+  max-width: 160px !important;
+  font-size: 12px;
+}
+
+.interchange-panel {
+  background:var(--panel);
+  border:1px solid #2b2f36;
+  border-radius:10px;
+  padding:8px;
+  margin-top:12px;
+  width:160px;
+}
+.interchange-panel h4 {
+  margin:4px 0 6px;
+  text-align:center;
+  font-size:14px;
+}
+.interchange-slot { margin-bottom:6px }
+
+/* Cusp & lists */
+.cusp {
+  background:var(--panel);
+  border:1px solid #2b2f36;
+  border-radius:10px;
+  padding:10px;
+  height:720px;
+}
+.cusp ul {
+  margin:10px 0 0;
+  padding-left:16px;
+  max-height:640px;
+  overflow:auto;
+}
+
+.extras {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  width:min(1200px,94vw);
+  margin:100px auto 40px;
+}
+.list-box {
+  background:var(--panel);
+  border:1px solid #2b2f36;
+  border-radius:10px;
+  padding:10px;
+}
+.grid-list {
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;
+}
+
+/* Force dropdowns above everything */
+.Select__menu {
+  z-index: 999999 !important;
+  position: absolute !important;
+}
+.Select__menu-portal {
+  z-index: 999999 !important;
+}
+
+/* Mobile */
+@media(max-width:1200px) {
+  .field-row {
+    grid-template-columns:1fr;
+    gap:22px;
+    margin-left:0; /* don’t shift left on small screens */
+  }
+  .oval {
+    width:94vw;
+    height:140vw;
+  }
+  .extras {
+    grid-template-columns:1fr;
+    margin-top:120px;
+  }
+  .followers-panel {
+    grid-template-columns:1fr 1fr;
+  }
+  .interchange-panel {
+    width:100%;
+  }
+}
+
+/* === Position coordinates === */
+/* ⚠️ Fine-tune positions here to move players on the oval */
+
+.pos-FB   { top: 95%; left: 45%; }
+.pos-BP-L { top: 85%; left: 20%; }
+.pos-BP-R { top: 85%; left: 67%; }
+
+.pos-CHB   { top: 66%; left: 45%; }
+.pos-HBF-L { top: 71%; left: 14%; }
+.pos-HBF-R { top: 71%; left: 74%; }
+
+.pos-C   { top: 45%; left: 45%; }
+.pos-W-L { top: 45%; left: 8%; }
+.pos-W-R { top: 45%; left: 81%; }
+
+.pos-CHF   { top: 26%; left: 45%; }
+.pos-HFF-L { top: 22%; left: 15%; }
+.pos-HFF-R { top: 22%; left: 76%; }
+
+.pos-FF   { top: 5%; left: 45%; }
+.pos-FP-L { top: 12%; left: 20%; }
+.pos-FP-R { top: 12%; left: 67%; }
+
+/* Labels */
+.pos-slot span {
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: unset;
+  font-size: 13px;
+}
+
+/* === Chosen player label styling === */
+.chosen-name {
+  background: rgba(43, 47, 54, 0.95);  /* dark semi-opaque background */
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4f6f8;                      /* ensure white text */
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4); /* make it pop off field */
+}
+
+.reset-btn {
+  background: #2d6cdf;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+.reset-btn:hover {
+  opacity: 0.85;
+}
