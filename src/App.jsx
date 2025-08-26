@@ -1,7 +1,3 @@
-/**
- * AFL & VFL Team Builder — Version 10.d (Safe Positioning)
- */
-
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import "./index.css";
@@ -33,7 +29,6 @@ const FIELD_POS = [
   { id: "FP-L", label: "FP" }, { id: "FF", label: "FF" }, { id: "FP-R", label: "FP" },
 ];
 
-/* Dark mode styles for all Select dropdowns */
 const selectStyles = {
   control: (base) => ({
     ...base,
@@ -57,8 +52,7 @@ const selectStyles = {
   }),
 };
 
-/* Two-stage dropdown (Team -> Player OR display name if chosen) */
-function TwoStageSelect({ value, onChange }) {
+function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, isVice, captainTaken, viceTaken }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   useEffect(() => {
@@ -66,16 +60,27 @@ function TwoStageSelect({ value, onChange }) {
   }, [value]);
 
   if (value) {
-    // Show chosen player's name + reset button
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <span className="chosen-name">{value}</span>
-        <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <span className="chosen-name">{value}</span>
+          <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
+        </div>
+        <div className="cv-buttons">
+          {!isCaptain && !captainTaken && (
+            <button className="c-btn" onClick={() => onSetCaptain(value)}>C</button>
+          )}
+          {isCaptain && <span className="c-tag">C</span>}
+
+          {!isVice && !viceTaken && (
+            <button className="vc-btn" onClick={() => onSetVice(value)}>VC</button>
+          )}
+          {isVice && <span className="vc-tag">VC</span>}
+        </div>
       </div>
     );
   }
 
-  // Default: team select first, then player select
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
       {!selectedTeam && (
@@ -103,8 +108,12 @@ function TwoStageSelect({ value, onChange }) {
   );
 }
 
-function Team({ title, team, setTeam, interchangeSide }) {
-  const setPos = (id, val) => setTeam((t) => ({ ...t, [id]: val }));
+function Team({ title, team, setTeam, interchangeSide, captain, vice, setCaptain, setVice }) {
+  const setPos = (id, val) => {
+    setTeam((t) => ({ ...t, [id]: val }));
+    if (captain === val) setCaptain(null);
+    if (vice === val) setVice(null);
+  };
 
   return (
     <div style={{ display: "flex", gap: "12px" }}>
@@ -114,7 +123,16 @@ function Team({ title, team, setTeam, interchangeSide }) {
           {INTERCHANGE_POS.map((slot) => (
             <div className="interchange-slot" key={slot}>
               <span className="pos-label">{slot}</span>
-              <TwoStageSelect value={team[slot]} onChange={(val) => setPos(slot, val)} />
+              <TwoStageSelect
+                value={team[slot]}
+                onChange={(val) => setPos(slot, val)}
+                onSetCaptain={setCaptain}
+                onSetVice={setVice}
+                isCaptain={captain === team[slot]}
+                isVice={vice === team[slot]}
+                captainTaken={!!captain}
+                viceTaken={!!vice}
+              />
             </div>
           ))}
         </div>
@@ -133,7 +151,16 @@ function Team({ title, team, setTeam, interchangeSide }) {
             {FIELD_POS.map(({ id, label }) => (
               <div key={id} className={`pos-slot pos-${id}`}>
                 <span className="pos-label">{label}</span>
-                <TwoStageSelect value={team[id]} onChange={(val) => setPos(id, val)} />
+                <TwoStageSelect
+                  value={team[id]}
+                  onChange={(val) => setPos(id, val)}
+                  onSetCaptain={setCaptain}
+                  onSetVice={setVice}
+                  isCaptain={captain === team[id]}
+                  isVice={vice === team[id]}
+                  captainTaken={!!captain}
+                  viceTaken={!!vice}
+                />
               </div>
             ))}
           </div>
@@ -143,7 +170,16 @@ function Team({ title, team, setTeam, interchangeSide }) {
           {FOLLOWER_POS.map((slot) => (
             <div className="follower-slot" key={slot}>
               <span className="pos-label">{slot}</span>
-              <TwoStageSelect value={team[slot]} onChange={(val) => setPos(slot, val)} />
+              <TwoStageSelect
+                value={team[slot]}
+                onChange={(val) => setPos(slot, val)}
+                onSetCaptain={setCaptain}
+                onSetVice={setVice}
+                isCaptain={captain === team[slot]}
+                isVice={vice === team[slot]}
+                captainTaken={!!captain}
+                viceTaken={!!vice}
+              />
             </div>
           ))}
         </div>
@@ -155,7 +191,16 @@ function Team({ title, team, setTeam, interchangeSide }) {
           {INTERCHANGE_POS.map((slot) => (
             <div className="interchange-slot" key={slot}>
               <span className="pos-label">{slot}</span>
-              <TwoStageSelect value={team[slot]} onChange={(val) => setPos(slot, val)} />
+              <TwoStageSelect
+                value={team[slot]}
+                onChange={(val) => setPos(slot, val)}
+                onSetCaptain={setCaptain}
+                onSetVice={setVice}
+                isCaptain={captain === team[slot]}
+                isVice={vice === team[slot]}
+                captainTaken={!!captain}
+                viceTaken={!!vice}
+              />
             </div>
           ))}
         </div>
@@ -170,10 +215,59 @@ export default function App() {
   const [cusp, setCusp] = useState([]);
   const [trade, setTrade] = useState([]);
   const [delist, setDelist] = useState([]);
+  const [captain, setCaptain] = useState(null);
+  const [vice, setVice] = useState(null);
 
+  // Reset buttons
   const resetAFL = () => setAflTeam({});
   const resetVFL = () => setVflTeam({});
-  const resetAll = () => { setAflTeam({}); setVflTeam({}); setCusp([]); setTrade([]); setDelist([]); };
+  const resetAll = () => { 
+    setAflTeam({}); 
+    setVflTeam({}); 
+    setCusp([]); 
+    setTrade([]); 
+    setDelist([]); 
+    setCaptain(null);
+    setVice(null);
+  };
+
+  // ===== Share link system =====
+  const handleShare = () => {
+    const encode = (team) => Object.entries(team).map(([k,v]) => `${k}:${v}`).join(";");
+    const params = new URLSearchParams({
+      afl: encode(aflTeam),
+      vfl: encode(vflTeam),
+      c: captain || "",
+      vc: vice || "",
+    });
+    const url = `${window.location.origin}?${params.toString()}`;
+    navigator.clipboard.writeText(url);
+    alert("Team link copied! Share it anywhere:\n" + url);
+  };
+
+  // ===== Load from URL (auto-fill) =====
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const parseTeam = (str) => {
+      if (!str) return {};
+      return str.split(";").reduce((acc, pair) => {
+        const [pos, player] = pair.split(":");
+        if (pos && player) acc[pos] = player;
+        return acc;
+      }, {});
+    };
+
+    const aflStr = params.get("afl");
+    const vflStr = params.get("vfl");
+    const c = params.get("c");
+    const vc = params.get("vc");
+
+    if (aflStr) setAflTeam(parseTeam(aflStr));
+    if (vflStr) setVflTeam(parseTeam(vflStr));
+    if (c) setCaptain(c);
+    if (vc) setVice(vc);
+  }, []);
 
   return (
     <div className="app">
@@ -183,11 +277,21 @@ export default function App() {
           <button onClick={resetAFL}>Reset AFL</button>
           <button onClick={resetVFL}>Reset VFL</button>
           <button onClick={resetAll}>Reset All</button>
+          <button onClick={handleShare}>Share</button>
         </div>
       </div>
 
       <div className="field-row">
-        <Team title="AFL Team" team={aflTeam} setTeam={setAflTeam} interchangeSide="left" />
+        <Team
+          title="AFL Team"
+          team={aflTeam}
+          setTeam={setAflTeam}
+          interchangeSide="left"
+          captain={captain}
+          vice={vice}
+          setCaptain={setCaptain}
+          setVice={setVice}
+        />
 
         <div className="cusp">
           <h3>On the Cusp of AFL Selection ({cusp.length}/5)</h3>
@@ -198,7 +302,16 @@ export default function App() {
           <ul>{cusp.map((p, i) => <li key={`${p}-${i}`}>{p}</li>)}</ul>
         </div>
 
-        <Team title="VFL Team" team={vflTeam} setTeam={setVflTeam} interchangeSide="right" />
+        <Team
+          title="VFL Team"
+          team={vflTeam}
+          setTeam={setVflTeam}
+          interchangeSide="right"
+          captain={captain}
+          vice={vice}
+          setCaptain={setCaptain}
+          setVice={setVice}
+        />
       </div>
 
       <div className="extras">
