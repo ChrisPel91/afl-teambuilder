@@ -233,25 +233,25 @@ button:hover { opacity:.9 }
 /* === Position coordinates === */
 /* ⚠️ Fine-tune positions here to move players on the oval */
 
-.pos-FB   { top: 95%; left: 45%; }
-.pos-BP-L { top: 85%; left: 20%; }
-.pos-BP-R { top: 85%; left: 67%; }
+.pos-FB   { top: 96%; left: 52%; }
+.pos-BP-L { top: 85%; left: 30%; }
+.pos-BP-R { top: 85%; left: 69%; }
 
-.pos-CHB   { top: 66%; left: 45%; }
-.pos-HBF-L { top: 71%; left: 14%; }
-.pos-HBF-R { top: 71%; left: 74%; }
+.pos-CHB   { top: 64%; left: 52%; }
+.pos-HBF-L { top: 72%; left: 25%; }
+.pos-HBF-R { top: 72%; left: 77%; }
 
-.pos-C   { top: 45%; left: 45%; }
-.pos-W-L { top: 45%; left: 8%; }
-.pos-W-R { top: 45%; left: 81%; }
+.pos-C   { top: 45%; left: 52%; }
+.pos-W-L { top: 45%; left: 17%; }
+.pos-W-R { top: 45%; left: 85%; }
 
-.pos-CHF   { top: 26%; left: 45%; }
-.pos-HFF-L { top: 22%; left: 15%; }
-.pos-HFF-R { top: 22%; left: 76%; }
+.pos-CHF   { top: 29%; left: 52%; }
+.pos-HFF-L { top: 24%; left: 25%; }
+.pos-HFF-R { top: 24%; left: 77%; }
 
-.pos-FF   { top: 5%; left: 45%; }
-.pos-FP-L { top: 12%; left: 20%; }
-.pos-FP-R { top: 12%; left: 67%; }
+.pos-FF   { top: 5%; left: 52%; }
+.pos-FP-L { top: 12%; left: 34%; }
+.pos-FP-R { top: 12%; left: 70%; }
 
 /* Labels */
 .pos-slot span {
@@ -285,4 +285,8 @@ button:hover { opacity:.9 }
 }
 .reset-btn:hover {
   opacity: 0.85;
+}
+
+.cusp div {
+  margin-bottom: 6px;
 }

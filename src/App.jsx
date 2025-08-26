@@ -14,10 +14,21 @@ const PLAYERS_BY_TEAM = PLAYERS.reduce((acc, p) => {
   return acc;
 }, {});
 
-const TEAM_OPTIONS = Object.keys(PLAYERS_BY_TEAM).sort().map((team) => ({
-  value: team,
-  label: team,
-}));
+// Allowed AFL + VFL team names
+const VALID_TEAMS = [
+  "Adelaide Crows", "Brisbane Lions", "Carlton", "Collingwood", "Essendon",
+  "Fremantle", "Geelong Cats", "Gold Coast Suns", "GWS Giants", "Hawthorn",
+  "Melbourne", "North Melbourne", "Port Adelaide", "Richmond",
+  "St Kilda", "Sydney Swans", "West Coast Eagles", "Western Bulldogs",
+  "Sandringham Zebras" // example VFL team
+];
+
+const TEAM_OPTIONS = Object.keys(PLAYERS_BY_TEAM)
+  .sort()
+  .map((team) => ({
+    value: team,
+    label: team,
+  }));
 
 const FOLLOWER_POS = ["Ruck", "Ruck Rover", "Rover", "Sub"];
 const INTERCHANGE_POS = ["IC1", "IC2", "IC3", "IC4"];
@@ -52,7 +63,7 @@ const selectStyles = {
   }),
 };
 
-function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, isVice, captainTaken, viceTaken }) {
+function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, isVice, captainTaken, viceTaken, showCaptainButtons = true }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
 
   useEffect(() => {
@@ -60,12 +71,14 @@ function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, i
   }, [value]);
 
   if (value) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <span className="chosen-name">{value}</span>
-          <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
-        </div>
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+        <span className="chosen-name">{value}</span>
+        <button className="reset-btn" onClick={() => onChange("")}>⟳</button>
+      </div>
+
+      {showCaptainButtons && (   // 👈 wrap C/VC buttons in this conditional
         <div className="cv-buttons">
           {!isCaptain && !captainTaken && (
             <button className="c-btn" onClick={() => onSetCaptain(value)}>C</button>
@@ -77,9 +90,10 @@ function TwoStageSelect({ value, onChange, onSetCaptain, onSetVice, isCaptain, i
           )}
           {isVice && <span className="vc-tag">VC</span>}
         </div>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
+}
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -294,13 +308,34 @@ export default function App() {
         />
 
         <div className="cusp">
-          <h3>On the Cusp of AFL Selection ({cusp.length}/5)</h3>
-          <TwoStageSelect
-            value={null}
-            onChange={(val) => val && cusp.length < 5 && setCusp((c) => [...c, val])}
-          />
-          <ul>{cusp.map((p, i) => <li key={`${p}-${i}`}>{p}</li>)}</ul>
-        </div>
+  <h3>On the Cusp of AFL Selection</h3>
+  {Array.from({ length: 5 }).map((_, i) => (
+    <div
+      key={`cusp-${i}`}
+      style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}
+    >
+      <TwoStageSelect
+        value={cusp[i] || ""}
+        onChange={(val) => {
+          const newList = [...cusp];
+          newList[i] = val;
+          setCusp(newList);
+        }}
+        showCaptainButtons={false}   // 👈 disables C/VC in cusp
+      />
+      <button
+        className="reset-btn"
+        onClick={() => {
+          const newList = [...cusp];
+          newList[i] = "";
+          setCusp(newList);
+        }}
+      >
+        ⟳
+      </button>
+    </div>
+  ))}
+</div>
 
         <Team
           title="VFL Team"
