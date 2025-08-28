@@ -21,19 +21,29 @@ const PLAYERS_BY_TEAM = PLAYERS.reduce((acc, p) => {
 }, {});
 
 const TEAM_OPTIONS = Object.keys(PLAYERS_BY_TEAM)
-  .filter(team => !["Team A", "Team B", "Team C"].includes(team)) // remove junk teams
+  .filter((team) => !["Team A", "Team B", "Team C"].includes(team)) // remove junk teams
   .sort()
-  .map(team => ({ value: team, label: team }));
+  .map((team) => ({ value: team, label: team }));
 
 /* ===== Layout data ===== */
 const FOLLOWER_POS = ["Ruck", "Ruck Rover", "Rover", "Sub"];
 const INTERCHANGE_POS = ["IC1", "IC2", "IC3", "IC4"];
 const FIELD_POS = [
-  { id: "BP-L", label: "BP" }, { id: "FB", label: "FB" }, { id: "BP-R", label: "BP" },
-  { id: "HBF-L", label: "HBF" }, { id: "CHB", label: "CHB" }, { id: "HBF-R", label: "HBF" },
-  { id: "W-L", label: "W" }, { id: "C", label: "C" }, { id: "W-R", label: "W" },
-  { id: "HFF-L", label: "HFF" }, { id: "CHF", label: "CHF" }, { id: "HFF-R", label: "HFF" },
-  { id: "FP-L", label: "FP" }, { id: "FF", label: "FF" }, { id: "FP-R", label: "FP" },
+  { id: "BP-L", label: "BP" },
+  { id: "FB", label: "FB" },
+  { id: "BP-R", label: "BP" },
+  { id: "HBF-L", label: "HBF" },
+  { id: "CHB", label: "CHB" },
+  { id: "HBF-R", label: "HBF" },
+  { id: "W-L", label: "W" },
+  { id: "C", label: "C" },
+  { id: "W-R", label: "W" },
+  { id: "HFF-L", label: "HFF" },
+  { id: "CHF", label: "CHF" },
+  { id: "HFF-R", label: "HFF" },
+  { id: "FP-L", label: "FP" },
+  { id: "FF", label: "FF" },
+  { id: "FP-R", label: "FP" },
 ];
 
 /* ===== react-select dark styles ===== */
@@ -77,6 +87,7 @@ function TwoStageSelect({
   isVice,
   captainTaken,
   viceTaken,
+  takenPlayers = [], // NEW: list of names already selected in THIS squad
 }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
 
@@ -85,24 +96,41 @@ function TwoStageSelect({
     if (!value) setSelectedTeam(null);
   }, [value]);
 
+  // Helper: apply "taken" filtering inside a team list // NEW
+  const filterTeamOptions = (opts) =>
+    (opts || []).filter((opt) => !takenPlayers.includes(opt.value)); // NEW
+
   // When a name is chosen, render label + optional C/VC
   if (value) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "4px",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <span className="chosen-name">{value}</span>
-          <button type="button" className="reset-btn" onClick={() => onChange("")}>⟳</button>
+          <button type="button" className="reset-btn" onClick={() => onChange("")}>
+            ⟳
+          </button>
         </div>
 
         {showCaptainButtons && (
           <div className="cv-buttons">
             {!isCaptain && !captainTaken && (
-              <button type="button" className="c-btn" onClick={() => onSetCaptain?.(value)}>C</button>
+              <button type="button" className="c-btn" onClick={() => onSetCaptain?.(value)}>
+                C
+              </button>
             )}
             {isCaptain && <span className="c-tag">C</span>}
 
             {!isVice && !viceTaken && (
-              <button type="button" className="vc-btn" onClick={() => onSetVice?.(value)}>VC</button>
+              <button type="button" className="vc-btn" onClick={() => onSetVice?.(value)}>
+                VC
+              </button>
             )}
             {isVice && <span className="vc-tag">VC</span>}
           </div>
@@ -115,7 +143,7 @@ function TwoStageSelect({
   if (sectionTeamFilter && PLAYERS_BY_TEAM[sectionTeamFilter]) {
     return (
       <Select
-        options={PLAYERS_BY_TEAM[sectionTeamFilter]}
+        options={filterTeamOptions(PLAYERS_BY_TEAM[sectionTeamFilter])} // NEW
         onChange={(player) => onChange(player.value)}
         placeholder={`Select ${sectionTeamFilter} player...`}
         styles={selectStyles}
@@ -141,7 +169,7 @@ function TwoStageSelect({
       )}
       {selectedTeam && (
         <Select
-          options={PLAYERS_BY_TEAM[selectedTeam.value]}
+          options={filterTeamOptions(PLAYERS_BY_TEAM[selectedTeam.value])} // NEW
           onChange={(player) => onChange(player.value)}
           placeholder="Select Player..."
           styles={selectStyles}
@@ -172,7 +200,9 @@ function MasterFilterRow({ label, enabled, setEnabled, team, setTeam }) {
         menuPortalTarget={document.body}
       />
       {enabled && team && (
-        <button type="button" className="reset-btn" onClick={() => setTeam(null)}>Clear</button>
+        <button type="button" className="reset-btn" onClick={() => setTeam(null)}>
+          Clear
+        </button>
       )}
     </div>
   );
@@ -188,27 +218,27 @@ function Team({
   vice,
   setCaptain,
   setVice,
-  sectionTeamFilter,        // when provided (string or null), locks selects to that team
-  sectionFilterEnabled,     // boolean — only applies filter if true
+  sectionTeamFilter, // when provided (string or null), locks selects to that team
+  sectionFilterEnabled, // boolean — only applies filter if true
+  takenPlayers = [], // NEW: prohibit duplicates within this squad
 }) {
   const effFilter = sectionFilterEnabled ? sectionTeamFilter : null;
 
   const setPos = (id, val) => {
-  setTeam((prev) => {
-    const next = { ...prev, [id]: val };
+    setTeam((prev) => {
+      const next = { ...prev, [id]: val };
 
-    // Captain/Vice cleanup against the *previous* state
-    if (!val || (captain && prev[id] === captain)) {
-      setCaptain((c) => (prev[id] === c ? null : c));
-    }
-    if (!val || (vice && prev[id] === vice)) {
-      setVice((v) => (prev[id] === v ? null : v));
-    }
+      // Captain/Vice cleanup against the *previous* state
+      if (!val || (captain && prev[id] === captain)) {
+        setCaptain((c) => (prev[id] === c ? null : c));
+      }
+      if (!val || (vice && prev[id] === vice)) {
+        setVice((v) => (prev[id] === v ? null : v));
+      }
 
-    return next;
-  });
-};
-
+      return next;
+    });
+  };
 
   return (
     <div style={{ display: "flex", gap: "12px" }}>
@@ -229,6 +259,7 @@ function Team({
                 isVice={vice === team[slot]}
                 captainTaken={!!captain}
                 viceTaken={!!vice}
+                takenPlayers={takenPlayers} // NEW
               />
             </div>
           ))}
@@ -260,6 +291,7 @@ function Team({
                   isVice={vice === team[id]}
                   captainTaken={!!captain}
                   viceTaken={!!vice}
+                  takenPlayers={takenPlayers} // NEW
                 />
               </div>
             ))}
@@ -281,6 +313,7 @@ function Team({
                 isVice={vice === team[slot]}
                 captainTaken={!!captain}
                 viceTaken={!!vice}
+                takenPlayers={takenPlayers} // NEW
               />
             </div>
           ))}
@@ -304,6 +337,7 @@ function Team({
                 isVice={vice === team[slot]}
                 captainTaken={!!captain}
                 viceTaken={!!vice}
+                takenPlayers={takenPlayers} // NEW
               />
             </div>
           ))}
@@ -352,11 +386,16 @@ export default function App() {
     setDelist(Array(15).fill(""));
     setCaptain(null);
     setVice(null);
-    setAflFilterEnabled(false); setAflFilterTeam(null);
-    setVflFilterEnabled(false); setVflFilterTeam(null);
-    setCuspFilterEnabled(false); setCuspFilterTeam(null);
-    setTradeFilterEnabled(false); setTradeFilterTeam(null);
-    setDelistFilterEnabled(false); setDelistFilterTeam(null);
+    setAflFilterEnabled(false);
+    setAflFilterTeam(null);
+    setVflFilterEnabled(false);
+    setVflFilterTeam(null);
+    setCuspFilterEnabled(false);
+    setCuspFilterTeam(null);
+    setTradeFilterEnabled(false);
+    setTradeFilterTeam(null);
+    setDelistFilterEnabled(false);
+    setDelistFilterTeam(null);
   };
 
   /* ===== Share link system ===== */
@@ -429,6 +468,14 @@ export default function App() {
     if (vc) setVice(vc);
   }, []);
 
+  /* ===== NEW: compute taken players per squad (AFL / VFL) ===== */
+  const takenAfl = Array.from(
+    new Set(Object.values(aflTeam).filter((v) => !!v))
+  ); // NEW
+  const takenVfl = Array.from(
+    new Set(Object.values(vflTeam).filter((v) => !!v))
+  ); // NEW
+
   /* ===== Render ===== */
   return (
     <div className="app">
@@ -436,10 +483,18 @@ export default function App() {
 
       <div className="header">
         <div className="top-buttons">
-          <button type="button" onClick={resetAFL}>Reset AFL</button>
-          <button type="button" onClick={resetVFL}>Reset VFL</button>
-          <button type="button" onClick={resetAll}>Reset All</button>
-          <button type="button" onClick={handleShare}>Share</button>
+          <button type="button" onClick={resetAFL}>
+            Reset AFL
+          </button>
+          <button type="button" onClick={resetVFL}>
+            Reset VFL
+          </button>
+          <button type="button" onClick={resetAll}>
+            Reset All
+          </button>
+          <button type="button" onClick={handleShare}>
+            Share
+          </button>
         </div>
       </div>
 
@@ -468,7 +523,9 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {aflFilterEnabled && aflFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>
+                  Clear
+                </button>
               )}
             </div>
           </div>
@@ -498,7 +555,9 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {vflFilterEnabled && vflFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setVflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setVflFilterTeam(null)}>
+                  Clear
+                </button>
               )}
             </div>
           </div>
@@ -517,6 +576,7 @@ export default function App() {
           setVice={setVice}
           sectionTeamFilter={aflFilterTeam}
           sectionFilterEnabled={aflFilterEnabled}
+          takenPlayers={takenAfl} // NEW
         />
 
         {/* CUSP COLUMN */}
@@ -546,13 +606,18 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {cuspFilterEnabled && cuspFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setCuspFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setCuspFilterTeam(null)}>
+                  Clear
+                </button>
               )}
             </div>
           </div>
 
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={`cusp-${i}`} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
+            <div
+              key={`cusp-${i}`}
+              style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}
+            >
               <TwoStageSelect
                 value={cusp[i] || ""}
                 onChange={(val) => {
@@ -562,15 +627,19 @@ export default function App() {
                 }}
                 sectionTeamFilter={cuspFilterEnabled ? cuspFilterTeam : null}
                 showCaptainButtons={false} // no C/VC in cusp
+                // NOTE: No takenPlayers here — CUSP not restricted
               />
-              <button type="button" className="reset-btn" onClick={() => {
-    const next = [...cusp];
-    next[i] = "";
-    setCusp(next);
-  }}
->
-  ⟳
-</button>
+              <button
+                type="button"
+                className="reset-btn"
+                onClick={() => {
+                  const next = [...cusp];
+                  next[i] = "";
+                  setCusp(next);
+                }}
+              >
+                ⟳
+              </button>
             </div>
           ))}
         </div>
@@ -586,6 +655,7 @@ export default function App() {
           setVice={setVice}
           sectionTeamFilter={vflFilterTeam}
           sectionFilterEnabled={vflFilterEnabled}
+          takenPlayers={takenVfl} // NEW
         />
       </div>
 
@@ -617,7 +687,9 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {tradeFilterEnabled && tradeFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setTradeFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setTradeFilterTeam(null)}>
+                  Clear
+                </button>
               )}
             </div>
           </div>
@@ -634,6 +706,7 @@ export default function App() {
                 }}
                 sectionTeamFilter={tradeFilterEnabled ? tradeFilterTeam : null}
                 showCaptainButtons={false}
+                // NOTE: No takenPlayers here — TRADE not restricted
               />
             ))}
           </div>
@@ -665,7 +738,13 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {delistFilterEnabled && delistFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+                <button
+                  type="button"
+                  className="reset-btn"
+                  onClick={() => setDelistFilterTeam(null)} // NEW fix (was setAflFilterTeam)
+                >
+                  Clear
+                </button>
               )}
             </div>
           </div>
@@ -682,6 +761,7 @@ export default function App() {
                 }}
                 sectionTeamFilter={delistFilterEnabled ? delistFilterTeam : null}
                 showCaptainButtons={false}
+                // NOTE: No takenPlayers here — DELIST not restricted
               />
             ))}
           </div>
