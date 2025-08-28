@@ -172,7 +172,7 @@ function MasterFilterRow({ label, enabled, setEnabled, team, setTeam }) {
         menuPortalTarget={document.body}
       />
       {enabled && team && (
-        <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+        <button type="button" className="reset-btn" onClick={() => setTeam(null)}>Clear</button>
       )}
     </div>
   );
@@ -498,7 +498,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {vflFilterEnabled && vflFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setVflFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
@@ -546,7 +546,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {cuspFilterEnabled && cuspFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setCuspFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
@@ -617,7 +617,7 @@ export default function App() {
                 menuPortalTarget={document.body}
               />
               {tradeFilterEnabled && tradeFilterTeam && (
-                <button type="button" className="reset-btn" onClick={() => setAflFilterTeam(null)}>Clear</button>
+                <button type="button" className="reset-btn" onClick={() => setTradeFilterTeam(null)}>Clear</button>
               )}
             </div>
           </div>
