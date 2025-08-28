@@ -68,8 +68,8 @@ button:hover { opacity:.9 }
 /* Oval */
 .oval {
   position:relative;
-  width:520px;
-  height:780px;
+  width:580px;   /* was 520px */
+  height:860px;  /* was 780px */
   border-radius:50% / 60%;
   background: radial-gradient(ellipse at center, var(--accent) 0%, var(--accent2) 100%);
   border:3px solid var(--line);
@@ -122,12 +122,15 @@ button:hover { opacity:.9 }
 
 /* Position slots inside oval */
 .pos-slot {
-  position:absolute;
-  transform:translate(-50%,-50%);
-  text-align:center;
-  width:60px;
-  z-index:5;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 60px;
+  z-index: 5;
+
+  overflow: visible;   /* 👈 allow children to extend */
 }
+
 .pos-slot .Select__control {
   min-width: 120px !important;
   max-width: 140px !important;
@@ -155,8 +158,11 @@ button:hover { opacity:.9 }
   border-radius:10px;
   padding:8px;
   margin-top:12px;
-  width:160px;
+  width:170px;       /* give a little more space */
+  margin-left:10px;  /* push outwards from oval */
+  margin-right:10px; /* push outwards from oval */
 }
+
 .interchange-panel h4 {
   margin:4px 0 6px;
   text-align:center;
@@ -169,9 +175,11 @@ button:hover { opacity:.9 }
   background:var(--panel);
   border:1px solid #2b2f36;
   border-radius:10px;
-  padding:10px;
-  height:720px;
+  padding:12px;
+  height:760px;   /* slightly taller */
+  margin:0 12px;  /* push away from oval */
 }
+
 .cusp ul {
   margin:10px 0 0;
   padding-left:16px;
@@ -182,10 +190,11 @@ button:hover { opacity:.9 }
 .extras {
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:24px;
-  width:min(1200px,94vw);
+  gap:28px; /* was 24px */
+  width:min(1250px,94vw); /* slightly wider */
   margin:100px auto 40px;
 }
+
 .list-box {
   background:var(--panel);
   border:1px solid #2b2f36;
@@ -264,14 +273,18 @@ button:hover { opacity:.9 }
 
 /* === Chosen player label styling === */
 .chosen-name {
-  background: rgba(43, 47, 54, 0.95);  /* dark semi-opaque background */
+  background: rgba(43, 47, 54, 0.95);
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #f4f6f8;                      /* ensure white text */
+  color: #f4f6f8;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4); /* make it pop off field */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+
+  position: relative;
+  z-index: 9999;       /* 👈 force it above oval */
+  overflow: visible;   /* 👈 let text flow out */
 }
 
 .reset-btn {
@@ -289,4 +302,31 @@ button:hover { opacity:.9 }
 
 .cusp div {
   margin-bottom: 6px;
+}
+
+/* Keep oval graphics clipped */
+.oval {
+  overflow: hidden;
+  position: relative;   /* ensure child positioning works */
+}
+
+/* Allow name boxes to render outside */
+.pos-slot {
+  overflow: visible !important;
+  z-index: 50;
+}
+
+/* === Chosen player label styling === */
+.chosen-name {
+  background: rgba(43, 47, 54, 0.95);  /* dark semi-opaque background */
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4f6f8;
+  white-space: normal;      /* ✅ allow wrapping */
+  word-wrap: break-word;    /* ✅ break if single long word */
+  text-align: center;       /* ✅ keep neat under position label */
+  max-width: 120px;         /* ✅ don’t stretch outside oval slot */
+  line-height: 1.2em;
 }
